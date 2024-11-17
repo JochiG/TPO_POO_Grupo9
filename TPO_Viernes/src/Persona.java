@@ -212,6 +212,7 @@ public class Persona {
                     // Mostrar los beneficios del ticket VIP seleccionado
                     System.out.println("Beneficios del Ticket VIP " + ticketVIPSeleccionado.getNumero() + ":");
                     ticketVIPSeleccionado.obtenerBeneficios();
+                    System.out.println("Si quiere mas beneficios, tendra que solicitar un upgrade en su ticket");
                 }
             }
         }
