@@ -7,19 +7,17 @@ public class TicketGeneral extends Ticket implements InterfazTicket{
     }
 
     public void solicitarUpgrade() {
-        /*Se tendria que fijar si hay tickets VIP disponibles en el Evento del ticket
-         y en caso de que si, "devolverTicket" de la clase Persona y
-         cuando haga toda la parte de si, se saca la Persona del ticket con "eliminarPersona".
-         En caso de que no, no se permite el Upgrade*/
+        try {
+            // Verifica si el ticket general tiene un evento asignado
+            if (this.getEventoAsignado() == null) {
+                throw new NullPointerException("No se ha asignado un evento a este ticket.");
+            }
 
-        // Verifica si el ticket general tiene un evento asignado
-        if (this.getEventoAsignado() != null) {
             Evento evento = this.getEventoAsignado();
 
             // Verificar si hay tickets VIP disponibles para el evento
             if (evento.getTicketsVIPSDisponibles().isEmpty()) {
-                System.out.println("No hay tickets VIP disponibles para upgrade.");
-                return;
+                throw new IllegalStateException("No hay tickets VIP disponibles para upgrade.");
             }
 
             // Eliminar el ticket general de la lista de tickets comprados de la persona
@@ -43,10 +41,13 @@ public class TicketGeneral extends Ticket implements InterfazTicket{
 
             // Mostrar mensaje de éxito
             System.out.println("Upgrade a VIP realizado con éxito.");
-        } else {
-            System.out.println("No se ha asignado un evento a este ticket.");
+        } catch (NullPointerException | IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error inesperado: " + e.getMessage());
         }
     }
+
 
     public float calcularPrecio() {
         float precio = this.getPrecioBase() - (this.getPrecioBase() * (this.getPropietario().Descuento() / 100.0f));

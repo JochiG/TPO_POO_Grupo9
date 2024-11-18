@@ -27,6 +27,7 @@ public class Persona {
           En caso de que NO:
             No se permite comprar el ticket*/
         // Mostrar los eventos disponibles
+        // Mostrar los eventos disponibles
         System.out.println("=== Lista de eventos disponibles ===");
         for (int i = 0; i < eventosDisponibles.size(); i++) {
             Evento evento = eventosDisponibles.get(i);
@@ -34,56 +35,65 @@ public class Persona {
         }
 
         // Preguntar al usuario qué evento desea
-        System.out.println("Seleccione el evento al que desea acudir: ");
-        Scanner scanner = new Scanner(System.in);
-        int eventoSeleccionado = scanner.nextInt();
-
-        if (eventoSeleccionado < 1 || eventoSeleccionado > eventosDisponibles.size()) {
-            System.out.println("Opción no válida.");
-            return;
+        int eventoSeleccionado = -1;
+        Scanner scanner = new Scanner(System.in);  // Asegúrate de que solo crees un objeto Scanner si no tienes uno global.
+        while (eventoSeleccionado < 1 || eventoSeleccionado > eventosDisponibles.size()) {
+            System.out.print("Seleccione el evento al que desea acudir: ");
+            try {
+                eventoSeleccionado = Integer.parseInt(scanner.nextLine());  // Lee la entrada como un número entero
+                if (eventoSeleccionado < 1 || eventoSeleccionado > eventosDisponibles.size()) {
+                    System.out.println("Opción no válida. Por favor, ingrese un número entre 1 y " + eventosDisponibles.size() + ".");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Por favor, ingrese un número.");
+            }
         }
 
         // Obtener el evento seleccionado
         Evento evento = eventosDisponibles.get(eventoSeleccionado - 1);
         if (evento.getEdadMinima() > this.getEdad()) {
-            System.out.println("No cumple con la edad necesaria para ingresar el evento.");
+            System.out.println("No cumple con la edad necesaria para ingresar al evento.");
+            return;
         } else {
             // Preguntar el tipo de ticket
-            System.out.println("Seleccione el tipo de ticket (1 para General - $500, 2 para VIP - $1000 (Solo Acceso Exlusivo)):");
-            int opcion = scanner.nextInt();
-
-            if (opcion == 1) {
-                if (!evento.getTicketsGeneralesDisponibles().isEmpty()) {
-                    TicketGeneral ticket = (TicketGeneral) evento.venderTicket(1);
-                    ticket.setEventoAsignado(evento);  // Asignamos el evento al ticket
-                    ticket.asignarPersona(this);
-                    // Agregar a la lista de tickets comprados
-                    this.TicketsComprados.add(ticket);
-                    System.out.println("Ticket General comprado con éxito.");
-                } else {
-                    System.out.println("No hay tickets generales disponibles.");
+            int opcion = -1;
+            while (opcion != 1 && opcion != 2) {
+                System.out.println("Seleccione el tipo de ticket:");
+                System.out.println("1. General - $500");
+                System.out.println("2. VIP - $1000 (Solo Acceso Exclusivo)");
+                try {
+                    opcion = Integer.parseInt(scanner.nextLine());  // Asegúrate de que sea un número entero
+                    if (opcion == 1) {
+                        if (!evento.getTicketsGeneralesDisponibles().isEmpty()) {
+                            TicketGeneral ticket = (TicketGeneral) evento.venderTicket(1);
+                            ticket.setEventoAsignado(evento);  // Asignamos el evento al ticket
+                            ticket.asignarPersona(this);
+                            this.TicketsComprados.add(ticket);
+                            System.out.println("Ticket General comprado con éxito.");
+                        } else {
+                            System.out.println("No hay tickets generales disponibles.");
+                        }
+                    } else if (opcion == 2) {
+                        if (!evento.getTicketsVIPSDisponibles().isEmpty()) {
+                            TicketVIP ticket = (TicketVIP) evento.venderTicket(2);
+                            ticket.setEventoAsignado(evento);  // Asignamos el evento al ticket
+                            ticket.asignarPersona(this);
+                            this.TicketsComprados.add(ticket);
+                            System.out.println("Ticket VIP comprado con éxito.");
+                        } else {
+                            System.out.println("No hay tickets VIP disponibles.");
+                        }
+                    } else {
+                        System.out.println("Opción no válida. Seleccione 1 para General o 2 para VIP.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrada inválida. Por favor, ingrese un número entre 1 y 2.");
                 }
-            } else if (opcion == 2) {
-                if (!evento.getTicketsVIPSDisponibles().isEmpty()) {
-                    TicketVIP ticket = (TicketVIP) evento.venderTicket(2);
-                    ticket.setEventoAsignado(evento);  // Asignamos el evento al ticket
-                    ticket.asignarPersona(this);
-                    this.TicketsComprados.add(ticket);
-                    System.out.println("Ticket VIP comprado con éxito.");
-                } else {
-                    System.out.println("No hay tickets VIP disponibles.");
-                }
-            } else {
-                System.out.println("Opción no válida.");
             }
         }
     }
 
-    public void devolverTicket(){
-        /*Llama al metodo "reembolsarTicket" de tal evento
-         y se saca el ticket de la coleccion de "TicketsComprados" de Persona.
-         y se dice "Ticket reembolsado o algo asi"*/
-
+    public void devolverTicket() {
         // Verificar si la persona tiene tickets comprados
         if (TicketsComprados.isEmpty()) {
             System.out.println("No tienes tickets comprados.");
@@ -95,30 +105,36 @@ public class Persona {
         for (int i = 0; i < TicketsComprados.size(); i++) {
             Ticket ticket = TicketsComprados.get(i);
             String tipoTicket = (ticket instanceof TicketVIP) ? "VIP" : "General";
-            System.out.println(i + 1 + ". Evento: " + ticket.getEventoAsignado().getNombre() + " | Ticket Nº: " + ticket.getNumero() + " | Tipo: " + tipoTicket);
+            System.out.println((i + 1) + ". Evento: " + ticket.getEventoAsignado().getNombre() + " | Ticket Nº: " + ticket.getNumero() + " | Tipo: " + tipoTicket);
         }
 
         // Solicitar que la persona elija el ticket a devolver
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Elige el número del ticket que deseas devolver:");
-        int opcion = scanner.nextInt();
+        int opcion = -1;
 
-        // Verificar si la opción es válida
-        if (opcion < 1 || opcion > TicketsComprados.size()) {
-            System.out.println("Opción inválida.");
-            return;
+        while (opcion < 1 || opcion > TicketsComprados.size()) {
+            System.out.println("Elige el número del ticket que deseas devolver:");
+            try {
+                opcion = Integer.parseInt(scanner.nextLine());  // Usamos nextLine para manejar entradas no numéricas
+                if (opcion < 1 || opcion > TicketsComprados.size()) {
+                    System.out.println("Opción inválida. Por favor, elige un número válido.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Por favor, ingresa un número.");
+            }
         }
 
         // Obtener el ticket seleccionado
         Ticket ticketSeleccionado = TicketsComprados.get(opcion - 1);
 
-        // Llamar al méthod reembolsarTicket del evento y eliminar el ticket de la colección
+        // Llamar al método reembolsarTicket del evento y eliminar el ticket de la colección
         ticketSeleccionado.getEventoAsignado().reembolsarTicket(ticketSeleccionado);
         TicketsComprados.remove(ticketSeleccionado);
 
         // Confirmar que el ticket ha sido reembolsado
         System.out.println("Ticket reembolsado con éxito.");
     }
+
 
     public void mostrarTicketsComprados(){
         /*Se muestran todos los tickets comprados, que estarian en una coleccion*/
@@ -149,30 +165,36 @@ public class Persona {
 
             // Solicitar que el usuario elija el ticket por el número de orden
             Scanner scannerUpgrade = new Scanner(System.in);
-            System.out.print("Elige el número del ticket que deseas upgradear: ");
-            int opcion = scannerUpgrade.nextInt();
+            int opcion = -1;
 
-            // Verificar si la opción es válida
-            if (opcion < 1 || opcion > this.getTicketsComprados().size()) {
-                System.out.println("Opción inválida.");
-            } else {
-                // Obtener el ticket seleccionado
-                Ticket ticketSeleccionado = this.getTicketsComprados().get(opcion - 1);
-
-                // Verificar si el ticket es general y permitir el upgrade, si es VIP, no se puede hacer upgrade
-                if (ticketSeleccionado instanceof TicketGeneral) {
-                    TicketGeneral ticketGeneral = (TicketGeneral) ticketSeleccionado;
-                    ticketGeneral.solicitarUpgrade();
-                } else {
-                    TicketVIP ticketVIP = (TicketVIP) ticketSeleccionado;
-                    ticketVIP.solicitarUpgrade();
+            while (opcion < 1 || opcion > this.getTicketsComprados().size()) {
+                System.out.print("Elige el número del ticket que deseas upgradear: ");
+                try {
+                    String input = scannerUpgrade.nextLine();  // Usamos nextLine para capturar la entrada completa
+                    opcion = Integer.parseInt(input);  // Intentamos convertir a número
+                    if (opcion < 1 || opcion > this.getTicketsComprados().size()) {
+                        System.out.println("Opción inválida. Por favor, elige un número válido.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrada inválida. Por favor, ingresa un número.");
                 }
+            }
+
+            // Obtener el ticket seleccionado
+            Ticket ticketSeleccionado = this.getTicketsComprados().get(opcion - 1);
+
+            // Verificar si el ticket es general y permitir el upgrade, si es VIP, no se puede hacer upgrade
+            if (ticketSeleccionado instanceof TicketGeneral) {
+                TicketGeneral ticketGeneral = (TicketGeneral) ticketSeleccionado;
+                ticketGeneral.solicitarUpgrade();
+            } else {
+                TicketVIP ticketVIP = (TicketVIP) ticketSeleccionado;
+                ticketVIP.solicitarUpgrade();
             }
         }
     }
 
     public void personaObtieneBeneficios() {
-
         // Asegurarse de que la persona tenga tickets comprados
         if (this.getTicketsComprados().isEmpty()) {
             System.out.println("No tienes tickets comprados.");
@@ -199,21 +221,28 @@ public class Persona {
 
                 // Solicitar que el usuario elija el ticket por número de orden
                 Scanner scannerBeneficios = new Scanner(System.in);
-                System.out.print("Elige el número del ticket VIP para ver los beneficios: ");
-                int opcionVIP = scannerBeneficios.nextInt();
+                int opcionVIP = -1;
 
-                // Verificar si la opción es válida
-                if (opcionVIP < 1 || opcionVIP > ticketsVIP.size()) {
-                    System.out.println("Opción inválida.");
-                } else {
-                    // Obtener el ticket VIP seleccionado
-                    TicketVIP ticketVIPSeleccionado = ticketsVIP.get(opcionVIP - 1);
-
-                    // Mostrar los beneficios del ticket VIP seleccionado
-                    System.out.println("Beneficios del Ticket VIP " + ticketVIPSeleccionado.getNumero() + ":");
-                    ticketVIPSeleccionado.obtenerBeneficios();
-                    System.out.println("Si quiere mas beneficios, tendra que solicitar un upgrade en su ticket");
+                while (opcionVIP < 1 || opcionVIP > ticketsVIP.size()) {
+                    System.out.print("Elige el número del ticket VIP para ver los beneficios: ");
+                    try {
+                        String input = scannerBeneficios.nextLine();  // Usamos nextLine para capturar la entrada completa
+                        opcionVIP = Integer.parseInt(input);  // Intentamos convertir a número
+                        if (opcionVIP < 1 || opcionVIP > ticketsVIP.size()) {
+                            System.out.println("Opción inválida. Por favor, elige un número válido.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Entrada inválida. Por favor, ingresa un número.");
+                    }
                 }
+
+                // Obtener el ticket VIP seleccionado
+                TicketVIP ticketVIPSeleccionado = ticketsVIP.get(opcionVIP - 1);
+
+                // Mostrar los beneficios del ticket VIP seleccionado
+                System.out.println("Beneficios del Ticket VIP " + ticketVIPSeleccionado.getNumero() + ":");
+                ticketVIPSeleccionado.obtenerBeneficios();
+                System.out.println("Si quieres más beneficios, tendrás que solicitar un upgrade en tu ticket.");
             }
         }
     }

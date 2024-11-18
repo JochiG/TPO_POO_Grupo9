@@ -23,12 +23,6 @@ public class TicketVIP extends Ticket implements InterfazTicket{
     }
 
     public void solicitarUpgrade() {
-        /*Se fija si NO tiene todos los beneficios, en caso de que NO:
-            darle un listado de cuales NO tiene, y preguntarle cual quiere (poner precio),
-            luego de agregarlo, fijarse si tiene todos los beneficios, en caso de que NO:
-                preguntarle si quiere agregar otro, en caso de que NO,
-            termina proceso, en caso de que SI, repetir proceso.
-         En caso de SI tener todos los beneficios, no permitir el Upgrade*/
         // Verifica si el ticket ya tiene todos los beneficios
         if (AccesoExclusivo && IncluyeCatering && IncluyeParking && AccesoBackstage && MeetNGreet) {
             System.out.println("Este ticket ya tiene todos los beneficios.");
@@ -61,44 +55,51 @@ public class TicketVIP extends Ticket implements InterfazTicket{
             }
             System.out.println("Elija un beneficio POR NÚMERO o ingrese 0 para salir:");
 
-            // Opción de continuar o salir
-            int opcion = scanner.nextInt();
+            int opcion = -1;
+            while (opcion < 0 || opcion > beneficiosInactivos.size()) {
+                try {
+                    String input = scanner.nextLine();  // Captura la entrada completa
+                    opcion = Integer.parseInt(input);  // Intenta convertir a entero
 
-            if (opcion == 0) {
-                System.out.println("Proceso de upgrade cancelado.");
-                return;  // Sale del proceso si elige 0
-            }
+                    if (opcion == 0) {
+                        System.out.println("Proceso de upgrade cancelado.");
+                        return;  // Sale del proceso si elige 0
+                    }
 
-            if (opcion > 0 && opcion <= beneficiosInactivos.size()) {
-                // Aplicar el beneficio elegido
-                String beneficioElegido = beneficiosInactivos.get(opcion - 1);
-                switch (beneficioElegido) {
-                    case "Catering - $100":
-                        this.IncluyeCatering = true;
-                        break;
-                    case "Parking - $50":
-                        this.IncluyeParking = true;
-                        break;
-                    case "Backstage - $300":
-                        this.AccesoBackstage = true;
-                        break;
-                    case "MeetNGreet - $150":
-                        this.MeetNGreet = true;
-                        break;
+                    if (opcion < 1 || opcion > beneficiosInactivos.size()) {
+                        System.out.println("Opción inválida. Por favor, elige un número válido.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrada inválida. Por favor, ingresa un número.");
                 }
-
-                System.out.println("Beneficio agregado: " + beneficioElegido);
-            } else {
-                System.out.println("Opción inválida.");
             }
+
+            // Aplicar el beneficio elegido
+            String beneficioElegido = beneficiosInactivos.get(opcion - 1);
+            switch (beneficioElegido) {
+                case "Catering - $100":
+                    this.IncluyeCatering = true;
+                    break;
+                case "Parking - $50":
+                    this.IncluyeParking = true;
+                    break;
+                case "Backstage - $300":
+                    this.AccesoBackstage = true;
+                    break;
+                case "MeetNGreet - $150":
+                    this.MeetNGreet = true;
+                    break;
+            }
+
+            System.out.println("Beneficio agregado: " + beneficioElegido);
 
             // Repetir el proceso hasta que todos los beneficios estén añadidos o el usuario decida salir
             this.solicitarUpgrade();
         } else {
             System.out.println("Este ticket ya tiene todos los beneficios.");
         }
-
     }
+
 
     public float calcularPrecio() {
         float precio = this.getPrecioBase();
